@@ -10,6 +10,7 @@ import com.weikey.liuguangapicommon.service.UserFeignClient;
 import com.weikey.liuguangapisdk.exception.ApiError;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -100,6 +101,7 @@ public class CustomFilter implements GatewayFilter {
 
         // 远程调用，去数据库根据accessKey查询secretKey
         User user = null;
+        log.info("测试userFeignClient是否为空：{}", userFeignClient);
         try {
             user = userFeignClient.getInvokeUser(accessKey);
         } catch (Exception e) {

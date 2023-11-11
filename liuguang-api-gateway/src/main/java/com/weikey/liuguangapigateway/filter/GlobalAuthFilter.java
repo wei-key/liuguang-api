@@ -6,6 +6,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ public class GlobalAuthFilter implements GlobalFilter, Ordered {
         // 判断路径中是否包含 inner，只允许内部调用
         if (antPathMatcher.match("/**/inner/**", path)) {
             ServerHttpResponse response = exchange.getResponse();
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON_UTF8);
             response.setStatusCode(HttpStatus.FORBIDDEN);
             DataBufferFactory dataBufferFactory = response.bufferFactory();
             DataBuffer dataBuffer = dataBufferFactory.wrap("无权限".getBytes(StandardCharsets.UTF_8));

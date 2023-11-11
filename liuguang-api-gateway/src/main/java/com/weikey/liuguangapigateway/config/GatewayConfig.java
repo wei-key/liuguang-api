@@ -10,8 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayConfig {
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder builder,
-                                           CustomFilter customFilter) {
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder, CustomFilter customFilter) {
         return builder.routes()
                 .route("liuguang-api-interface-service", r -> r.path("/api/interface-service/**")
                         .filters(f -> f.filter(customFilter)

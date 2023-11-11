@@ -143,7 +143,7 @@ public class InterfaceInfoController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<InterfaceInfoInvokeVO> getInterfaceInfoInvokeVOById(long id, HttpServletRequest request) {
+    public BaseResponse<InterfaceInfoInvokeVO> getInterfaceInfoInvokeVOById(@RequestParam("id") long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
