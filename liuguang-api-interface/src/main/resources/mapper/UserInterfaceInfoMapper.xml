@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikey.liuguangapiinterface.mapper.UserInterfaceInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.weikey.liuguangapicommon.model.entity.UserInterfaceInfo">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="BIGINT"/>
+            <result property="totalNum" column="totalNum" jdbcType="INTEGER"/>
+            <result property="leftNum" column="leftNum" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,userId,interfaceInfoId,
+        totalNum,leftNum,status,
+        createTime,updateTime,isDelete
+    </sql>
+
+    <!--List<InterfaceInfoCountVo> topInvokeCount(int n);-->
+    <select id="listTopInvokeCount" resultType="com.weikey.liuguangapicommon.model.vo.InterfaceInfoCountVO">
+        SELECT interfaceInfoId as id, SUM(totalNum) as totalCount
+        FROM user_interface_info
+        GROUP BY interfaceInfoId
+        ORDER BY totalCount DESC LIMIT #{limit};
+    </select>
+</mapper>

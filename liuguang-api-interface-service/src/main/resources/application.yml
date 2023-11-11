@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: liuguang-api-interface-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+server:
+  port: 8405
+  servlet:
+    context-path: /api/interface-service # 访问前缀
+api:
+  resou:
+    access-key: 427c354ff1ead77b8066e365a77615e1
+    secret-key: 31afa56880142282f9678a23d419ac01
+  weather:
+    appid: 56761788
+    appsecret: ti3hP8y9
+
+

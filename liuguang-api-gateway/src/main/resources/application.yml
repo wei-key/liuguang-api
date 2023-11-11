@@ -1,0 +1,49 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      routes:
+        - id: liuguang-api-user
+          uri: lb://liuguang-api-user
+          predicates:
+            - Path=/api/user/**
+        - id: liuguang-api-interface
+          uri: lb://liuguang-api-interface
+          predicates:
+            - Path=/api/interface/**
+        - id: liuguang-api-order
+          uri: lb://liuguang-api-order
+          predicates:
+            - Path=/api/order/**
+  application:
+    name: liuguang-api-gateway
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 123321
+    # 需要手动配置连接池，连接池才会生效
+    # spring默认使用的是lettuce客户端
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 100ms
+  main:
+    web-application-type: reactive
+server:
+  address: 0.0.0.0
+  port: 8401
+knife4j:
+  gateway:
+    # ① 第一个配置，开启gateway聚合组件
+    enabled: true
+    # ② 第二行配置，设置聚合模式采用discover服务发现的模式
+    strategy: discover
+    discover:
+      # ③ 第三行配置，开启discover模式
+      enabled: true
+      # ④ 第四行配置，聚合子服务全部为Swagger2规范的文档
+      version: swagger2

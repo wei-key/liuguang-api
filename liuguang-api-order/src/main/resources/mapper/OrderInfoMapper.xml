@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.weikey.liuguangapiorder.mapper.OrderInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.weikey.liuguangapicommon.model.entity.OrderInfo">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="orderNo" column="orderNo" jdbcType="VARCHAR"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="interfaceId" column="interfaceId" jdbcType="BIGINT"/>
+            <result property="totalFee" column="totalFee" jdbcType="INTEGER"/>
+            <result property="amount" column="amount" jdbcType="INTEGER"/>
+            <result property="orderStatus" column="orderStatus" jdbcType="INTEGER"/>
+            <result property="paymentType" column="paymentType" jdbcType="INTEGER"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,title,orderNo,
+        userId,interfaceId,totalFee,
+        orderStatus,paymentType,amount,
+        createTime,updateTime,isDelete
+    </sql>
+</mapper>
