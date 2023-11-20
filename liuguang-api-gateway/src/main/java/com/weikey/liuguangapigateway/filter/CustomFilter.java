@@ -13,6 +13,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -32,6 +33,7 @@ import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.weikey.liuguangapigateway.utils.ResultUtils.handleError;
@@ -40,7 +42,7 @@ import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
 
 @Component
 @Slf4j
-public class CustomFilter implements GatewayFilter {
+public class CustomFilter implements GatewayFilter, Ordered {
 
     private static final List<String> HOST_WHITE_LIST = Arrays.asList("127.0.0.1");
 
@@ -60,8 +62,8 @@ public class CustomFilter implements GatewayFilter {
     @Resource
     private InterfaceFeignClient interfaceFeignClient;
 
+
     /**
-     *
      * @param exchange
      * @param chain
      * @return
@@ -101,7 +103,6 @@ public class CustomFilter implements GatewayFilter {
 
         // 远程调用，去数据库根据accessKey查询secretKey
         User user = null;
-        log.info("测试userFeignClient是否为空：{}", userFeignClient);
         try {
             user = userFeignClient.getInvokeUser(accessKey);
         } catch (Exception e) {
@@ -216,5 +217,15 @@ public class CustomFilter implements GatewayFilter {
         // 6.请求转发，调用接口
         // 设置response对象为修饰过的
         return chain.filter(exchange.mutate().response(decoratedResponse).build());
+    }
+
+
+    /**
+     * 响应的处理逻辑要想起作用，自定义过滤器的 Order 值（优先级）必须设置为 -2 或者 更小
+     * @return
+     */
+    @Override
+    public int getOrder() {
+        return -2;
     }
 }

@@ -30,7 +30,6 @@ import java.util.List;
  * @author wei-key
  */
 @RestController
-@RequestMapping("/user")
 @Slf4j
 public class UserController {
 
