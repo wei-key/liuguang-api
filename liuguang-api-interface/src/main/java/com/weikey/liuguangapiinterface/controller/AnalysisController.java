@@ -13,7 +13,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
- * 统计分析控制器
+ * 接口统计分析
  *
  * @author wei-key
  */
@@ -27,7 +27,7 @@ public class AnalysisController {
     /**
      * 统计接口总调用次数的topN
      *
-     * @return
+     * @return 接口信息及总调用次数
      */
     @GetMapping("/top/invoke/interface")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
