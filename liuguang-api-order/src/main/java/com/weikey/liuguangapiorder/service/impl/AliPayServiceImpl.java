@@ -21,6 +21,7 @@ import com.weikey.liuguangapicommon.model.enums.OrderStatus;
 import com.weikey.liuguangapicommon.model.enums.PayType;
 import com.weikey.liuguangapicommon.service.InterfaceFeignClient;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapiorder.mq.MessageService;
 import com.weikey.liuguangapiorder.service.AliPayService;
 import com.weikey.liuguangapiorder.service.OrderInfoService;
@@ -89,7 +90,7 @@ public class AliPayServiceImpl implements AliPayService {
             }
 
             // 获取当前登录用户
-            Long userId = userFeignClient.getLoginUser(request).getId();
+            Long userId = JWTUtils.getUidFromToken(request);
 
 
             // 1.创建订单

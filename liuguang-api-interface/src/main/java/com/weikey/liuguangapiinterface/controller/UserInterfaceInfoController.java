@@ -17,6 +17,7 @@ import com.weikey.liuguangapicommon.model.entity.UserInterfaceInfo;
 import com.weikey.liuguangapicommon.model.enums.ErrorCode;
 import com.weikey.liuguangapicommon.model.response.BaseResponse;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapicommon.utils.ResultUtils;
 import com.weikey.liuguangapicommon.utils.ThrowUtils;
 import com.weikey.liuguangapiinterface.service.UserInterfaceInfoService;
@@ -64,7 +65,7 @@ public class UserInterfaceInfoController {
 
         Long interfaceInfoId = userInterfaceInfoActivateRequest.getUserId();
         Integer invokeNum = userInterfaceInfoActivateRequest.getAmount();
-        Long userId = userFeignClient.getLoginUser(request).getId();
+        Long userId = JWTUtils.getUidFromToken(request);
 
         // todo prettyCode 加锁解决并发；摘要算法解决字符串拼接冲突
         Boolean result = null;

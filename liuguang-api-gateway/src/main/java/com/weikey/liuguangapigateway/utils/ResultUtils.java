@@ -10,8 +10,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import static com.weikey.liuguangapisdk.constant.HeaderConstant.HEADER_NAME;
-import static com.weikey.liuguangapisdk.constant.HeaderConstant.HEADER_VALUE;
+import static com.weikey.liuguangapisdk.constant.HeaderConstant.RESP_ERROR_NAME;
+import static com.weikey.liuguangapisdk.constant.HeaderConstant.RESP_ERROR_VALUE;
 
 @Slf4j
 public class ResultUtils {
@@ -27,7 +27,7 @@ public class ResultUtils {
     public static Mono<Void> handleError(ServerWebExchange exchange, ApiError apiError) {
         ServerHttpResponse response = exchange.getResponse();
         // todo 设置响应头，当响应头中有此字段时，表示响应数据为错误信息
-        response.getHeaders().set(HEADER_NAME, HEADER_VALUE);
+        response.getHeaders().set(RESP_ERROR_NAME, RESP_ERROR_VALUE);
         response.setStatusCode(HttpStatus.OK); // todo 可以吗？
         return response.writeWith(Mono.fromSupplier(() -> {
             DataBufferFactory bufferFactory = response.bufferFactory();

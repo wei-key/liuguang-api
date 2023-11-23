@@ -9,6 +9,7 @@ import com.weikey.liuguangapicommon.model.vo.LoginUserVO;
 import com.weikey.liuguangapicommon.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -34,9 +35,10 @@ public interface UserService extends IService<User> {
      * @param userAccount  用户账户
      * @param userPassword 用户密码
      * @param request
+     * @param response
      * @return 脱敏后的用户信息
      */
-    LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request);
+    LoginUserVO userLogin(String userAccount, String userPassword);
 
     /**
      * 用户登录（微信开放平台）
@@ -46,6 +48,8 @@ public interface UserService extends IService<User> {
      * @return 脱敏后的用户信息
      */
     //LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request);
+
+    LoginUserVO userVerify(String userAccount, String userPassword);
 
     /**
      * 获取当前登录用户
@@ -58,10 +62,9 @@ public interface UserService extends IService<User> {
     /**
      * 获取当前登录用户（允许未登录）
      *
-     * @param request
      * @return
      */
-    User getLoginUserPermitNull(HttpServletRequest request);
+//    User getLoginUserPermitNull(HttpServletRequest request);
 
     /**
      * 是否为管理员
@@ -82,10 +85,9 @@ public interface UserService extends IService<User> {
     /**
      * 用户注销
      *
-     * @param request
      * @return
      */
-    boolean userLogout(HttpServletRequest request);
+//    boolean userLogout(HttpServletRequest request);
 
     /**
      * 获取脱敏的已登录用户信息

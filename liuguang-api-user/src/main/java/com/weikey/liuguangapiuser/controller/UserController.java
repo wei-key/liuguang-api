@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -63,11 +64,10 @@ public class UserController {
      * 用户登录
      *
      * @param userLoginRequest
-     * @param request
      * @return
      */
     @PostMapping("/login")
-    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest) {
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -76,7 +76,27 @@ public class UserController {
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword);
+        return ResultUtils.success(loginUserVO);
+    }
+
+    /**
+     * 用户身份验证
+     *
+     * @param userLoginRequest
+     * @return
+     */
+    @PostMapping("/verify")
+    public BaseResponse<LoginUserVO> userVerify(@RequestBody UserLoginRequest userLoginRequest) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LoginUserVO loginUserVO = userService.userVerify(userAccount, userPassword);
         return ResultUtils.success(loginUserVO);
     }
 
@@ -84,17 +104,16 @@ public class UserController {
     /**
      * 用户注销
      *
-     * @param request
      * @return
      */
-    @PostMapping("/logout")
-    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
-        if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = userService.userLogout(request);
-        return ResultUtils.success(result);
-    }
+//    @PostMapping("/logout")
+//    public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+//        if (request == null) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        boolean result = userService.userLogout(request);
+//        return ResultUtils.success(result);
+//    }
 
     /**
      * 获取当前登录用户

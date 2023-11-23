@@ -9,6 +9,7 @@ import com.weikey.liuguangapicommon.model.enums.ErrorCode;
 import com.weikey.liuguangapicommon.model.enums.OrderStatus;
 import com.weikey.liuguangapicommon.model.response.BaseResponse;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapicommon.utils.ResultUtils;
 import com.weikey.liuguangapiorder.service.AliPayService;
 import com.weikey.liuguangapiorder.service.OrderInfoService;
@@ -50,9 +51,7 @@ public class OrderInfoController {
     @PostMapping("/page")
     public BaseResponse<Page<OrderInfo>> listOrderPageByCreateTimeDesc(@RequestBody OrderInfoPageRequest orderInfoPageRequest, HttpServletRequest request) {
         // 获取当前登录用户
-        User loginUser = userFeignClient.getLoginUser(request);
-
-        return orderInfoService.listOrderPageByCreateTimeDesc(orderInfoPageRequest, loginUser.getId());
+        return orderInfoService.listOrderPageByCreateTimeDesc(orderInfoPageRequest, JWTUtils.getUidFromToken(request));
     }
 
     /**

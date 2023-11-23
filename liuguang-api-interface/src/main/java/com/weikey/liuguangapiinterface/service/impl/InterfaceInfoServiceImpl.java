@@ -22,6 +22,7 @@ import com.weikey.liuguangapicommon.model.vo.InterfaceInfoVO;
 import com.weikey.liuguangapicommon.model.vo.RequestParamsRemarkVO;
 import com.weikey.liuguangapicommon.model.vo.ResponseParamsRemarkVO;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapicommon.utils.ResultUtils;
 import com.weikey.liuguangapicommon.utils.SqlUtils;
 import com.weikey.liuguangapicommon.utils.ThrowUtils;
@@ -140,7 +141,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
                 this.getQueryWrapper(interfaceInfoQueryRequest));
 
         // 2.查询当前用户调用接口的情况
-        Long userId = userFeignClient.getLoginUser(request).getId();
+        Long userId = JWTUtils.getUidFromToken(request);
         QueryWrapper<UserInterfaceInfo> userInterfaceInfoQueryWrapper = new QueryWrapper<>();
         userInterfaceInfoQueryWrapper.eq("userId", userId);
         Map<Long, List<UserInterfaceInfo>> map = userInterfaceInfoService.list(userInterfaceInfoQueryWrapper)
@@ -197,7 +198,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         List<InterfaceInfo> interfaceInfoList = this.list(this.getQueryWrapper(interfaceInfoQueryRequest));
 
         // 2.查询当前用户调用接口的情况
-        Long userId = userFeignClient.getLoginUser(request).getId();
+        Long userId = JWTUtils.getUidFromToken(request);
         QueryWrapper<UserInterfaceInfo> userInterfaceInfoQueryWrapper = new QueryWrapper<>();
         userInterfaceInfoQueryWrapper.eq("userId", userId);
         Map<Long, List<UserInterfaceInfo>> map = userInterfaceInfoService.list(userInterfaceInfoQueryWrapper)
@@ -313,7 +314,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         interfaceInfoInvokeVO.setResponseParamsRemark((List<ResponseParamsRemarkVO>) responseParamsRemark);
 
         // 设置当前用户调用接口的情况
-        Long userId = userFeignClient.getLoginUser(request).getId();
+        Long userId = JWTUtils.getUidFromToken(request);
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", userId);
         queryWrapper.eq("interfaceInfoId", id);

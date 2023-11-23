@@ -7,12 +7,14 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.weikey.liuguangapicommon.constant.CommonConstant;
 import com.weikey.liuguangapicommon.exception.BusinessException;
+import com.weikey.liuguangapicommon.model.dto.common.JwtUserDto;
 import com.weikey.liuguangapicommon.model.dto.user.UserQueryRequest;
 import com.weikey.liuguangapicommon.model.entity.User;
 import com.weikey.liuguangapicommon.model.enums.ErrorCode;
 import com.weikey.liuguangapicommon.model.enums.UserRoleEnum;
 import com.weikey.liuguangapicommon.model.vo.LoginUserVO;
 import com.weikey.liuguangapicommon.model.vo.UserVO;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapicommon.utils.SqlUtils;
 import com.weikey.liuguangapicommon.utils.ThrowUtils;
 import com.weikey.liuguangapiuser.mapper.UserMapper;
@@ -29,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.weikey.liuguangapicommon.constant.UserConstant.USER_LOGIN_STATE;
 
 
 /**
@@ -95,7 +96,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+    public LoginUserVO userLogin(String userAccount, String userPassword) {
+        // 登录校验
+        LoginUserVO loginUserVO = this.userVerify(userAccount, userPassword);
+        // 登录校验通过，生成token
+        String token = JWTUtils.generateToken(new JwtUserDto(loginUserVO.getId(), loginUserVO.getUserRole()));
+        // 将token设置在loginUserVO中返回给前端
+        loginUserVO.setToken(token);
+        return loginUserVO;
+    }
+
+
+    @Override
+    public LoginUserVO userVerify(String userAccount, String userPassword) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -118,8 +131,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
-        // 3. 记录用户的登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
 
@@ -163,15 +174,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
+        // 从token中取出用户id
+        Long uid = JWTUtils.getUidFromToken(request);
+        if (uid == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
+        User currentUser = this.getById(uid);
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -181,21 +190,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 获取当前登录用户（允许未登录）
      *
-     * @param request
      * @return
      */
-    @Override
-    public User getLoginUserPermitNull(HttpServletRequest request) {
-        // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            return null;
-        }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        return this.getById(userId);
-    }
+//    @Override
+//    public User getLoginUserPermitNull(HttpServletRequest request) {
+//        // 先判断是否已登录
+//        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+//        User currentUser = (User) userObj;
+//        if (currentUser == null || currentUser.getId() == null) {
+//            return null;
+//        }
+//        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+//        long userId = currentUser.getId();
+//        return this.getById(userId);
+//    }
 
     /**
      * 是否为管理员
@@ -206,9 +214,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean isAdmin(HttpServletRequest request) {
         // 仅管理员可查询
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObj;
-        return isAdmin(user);
+        String role = JWTUtils.getRoleFromToken(request);
+        return UserRoleEnum.ADMIN.getValue().equals(role);
     }
 
     @Override
@@ -219,17 +226,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 用户注销
      *
-     * @param request
      */
-    @Override
-    public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
-        }
-        // 移除登录态
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
-        return true;
-    }
+//    @Override
+//    public boolean userLogout(HttpServletRequest request) {
+//        if (request.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+//            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+//        }
+//        // 移除登录态
+//        request.getSession().removeAttribute(USER_LOGIN_STATE);
+//        return true;
+//    }
 
     @Override
     public LoginUserVO getLoginUserVO(User user) {

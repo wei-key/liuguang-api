@@ -19,6 +19,7 @@ import com.weikey.liuguangapicommon.model.response.BaseResponse;
 import com.weikey.liuguangapicommon.model.vo.InterfaceInfoInvokeVO;
 import com.weikey.liuguangapicommon.model.vo.InterfaceInfoVO;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapicommon.utils.JWTUtils;
 import com.weikey.liuguangapicommon.utils.ResultUtils;
 import com.weikey.liuguangapicommon.utils.ThrowUtils;
 import com.weikey.liuguangapiinterface.service.InterfaceInfoService;
@@ -72,8 +73,7 @@ public class InterfaceInfoController {
 
         // todo 参数校验完善？
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true); // 参数校验
-        User loginUser = userFeignClient.getLoginUser(request);
-        interfaceInfo.setUserId(loginUser.getId()); // 创建人为当前用户
+        interfaceInfo.setUserId(JWTUtils.getUidFromToken(request)); // 创建人为当前用户
 
         boolean result = interfaceInfoService.save(interfaceInfo); // 保存
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -93,13 +93,12 @@ public class InterfaceInfoController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userFeignClient.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断接口是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅创建者或管理员可删除
-        if (!oldInterfaceInfo.getUserId().equals(user.getId()) && !userFeignClient.isAdmin(request)) {
+        if (!oldInterfaceInfo.getUserId().equals(JWTUtils.getUidFromToken(request)) && !userFeignClient.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = interfaceInfoService.removeById(id);
@@ -301,7 +300,7 @@ public class InterfaceInfoController {
         ThrowUtils.throwIf(status == InterfaceInfoStatusEnum.OFFLINE.getValue(), ErrorCode.SYSTEM_ERROR, "接口已关闭");
         // 3.调用接口
         // todo 这里ak、sk是当前登录用户的，在线调用也会扣减用户的调用次数
-        User loginUser = userFeignClient.getLoginUser(request);
+        User loginUser = userFeignClient.getLoginUser(JWTUtils.getUidFromToken(request));
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         ApiClient apiClient = new ApiClient(accessKey, secretKey);

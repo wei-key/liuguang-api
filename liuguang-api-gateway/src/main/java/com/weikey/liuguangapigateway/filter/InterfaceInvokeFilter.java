@@ -10,7 +10,6 @@ import com.weikey.liuguangapicommon.service.UserFeignClient;
 import com.weikey.liuguangapisdk.exception.ApiError;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
@@ -33,7 +32,6 @@ import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.weikey.liuguangapigateway.utils.ResultUtils.handleError;
@@ -42,7 +40,7 @@ import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
 
 @Component
 @Slf4j
-public class CustomFilter implements GatewayFilter, Ordered {
+public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
 
     private static final List<String> HOST_WHITE_LIST = Arrays.asList("127.0.0.1");
 

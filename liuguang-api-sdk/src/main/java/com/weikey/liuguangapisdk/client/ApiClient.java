@@ -122,7 +122,7 @@ public class ApiClient {
     }
 
     private String checkError(HttpResponse httpResponse) {
-        String header = httpResponse.header(HeaderConstant.HEADER_NAME);
+        String header = httpResponse.header(HeaderConstant.RESP_ERROR_NAME);
         String body = httpResponse.body();
 
         // 响应状态码为429，被限流
