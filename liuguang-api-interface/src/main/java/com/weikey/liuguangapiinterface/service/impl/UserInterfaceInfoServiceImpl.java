@@ -108,9 +108,9 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     /**
      * 分配接口的调用次数
      * todo 并发的考虑：是否存在并发的问题？
-     * @param interfaceId
-     * @param amount
-     * @param userId
+     * @param interfaceId 接口id
+     * @param amount 接口调用次数
+     * @param userId 用户id
      */
     @Override
     public void addCount(long interfaceId, int amount, long userId) {
@@ -118,20 +118,20 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         if (interfaceId <= 0 || amount <= 0 || userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 2. 查询是否有记录
+        // 2. 查询用户是否有接口次数分配的记录
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", userId).eq("interfaceInfoId", interfaceId);
         UserInterfaceInfo userInterfaceInfo = this.getOne(queryWrapper);
 
         if (userInterfaceInfo == null) {
-            // 2.1 没有记录，创建，同时设置调用次数
+            // 2.1 没有记录，创建记录，同时设置调用次数
             userInterfaceInfo = new UserInterfaceInfo();
             userInterfaceInfo.setUserId(userId);
             userInterfaceInfo.setInterfaceInfoId(interfaceId);
             userInterfaceInfo.setLeftNum(amount);
             this.save(userInterfaceInfo);
         } else {
-            // 2.2 有记录，增加次数
+            // 2.2 有记录，增加调用次数
             UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
             updateWrapper.set("leftNum", userInterfaceInfo.getLeftNum() + amount)
                     .eq("id", userInterfaceInfo.getId());
