@@ -15,41 +15,17 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-  # session 配置
-  session:
-    # 分布式 session
-    store-type: redis
-    # 30 天过期
-    timeout: 2592000
   # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/myapi
     username: root
     password: hsp
-  redis:
-    host: 127.0.0.1
-    port: 6379
-    password: 123321
-    # 需要手动配置连接池，连接池才会生效
-    # spring默认使用的是lettuce客户端
-    lettuce:
-      pool:
-        max-active: 8
-        max-idle: 8
-        min-idle: 0
-        max-wait: 100ms
-    database: 0
 server:
   address: 0.0.0.0
   port: 8402
   servlet:
     context-path: /api/user
-    # cookie 30 天过期
-    session:
-      cookie:
-        max-age: 2592000
-        path: /api
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false

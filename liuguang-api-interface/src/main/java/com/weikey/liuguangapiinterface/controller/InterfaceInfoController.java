@@ -279,7 +279,7 @@ public class InterfaceInfoController {
     }
 
     /**
-     * 调用
+     * 接口在线调用
      * @param interfaceInfoInvokeRequest
      * @param request
      * @return
@@ -298,16 +298,16 @@ public class InterfaceInfoController {
         // 2.校验接口状态
         Integer status = oldInterfaceInfo.getStatus();
         ThrowUtils.throwIf(status == InterfaceInfoStatusEnum.OFFLINE.getValue(), ErrorCode.SYSTEM_ERROR, "接口已关闭");
-        // 3.调用接口
+        // 3.通过反射调用sdk中接口对应的方法
         // todo 这里ak、sk是当前登录用户的，在线调用也会扣减用户的调用次数
-        User loginUser = userFeignClient.getLoginUser(JWTUtils.getUidFromToken(request));
+        User loginUser = userFeignClient.getLoginUser(JWTUtils.getUidFromToken(request)); // 获取当前登录用户
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
         ApiClient apiClient = new ApiClient(accessKey, secretKey);
 
         String name = oldInterfaceInfo.getName();
         Method method = getMethod(name); // 方法对象
-        Class<?>[] parameterTypes = method.getParameterTypes();
+        Class<?>[] parameterTypes = method.getParameterTypes(); // 方法参数
         Object result = null;
         if (parameterTypes.length == 0) { // 3.1接口方法没有参数，直接调用
             try {
@@ -327,7 +327,6 @@ public class InterfaceInfoController {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
             }
         }
-
 
         return ResultUtils.success(result);
     }
