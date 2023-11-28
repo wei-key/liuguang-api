@@ -192,7 +192,6 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         long current = interfaceInfoQueryRequest.getCurrent();
         long size = interfaceInfoQueryRequest.getPageSize();
         // 限制爬虫
-        // todo 这里的限制爬虫是什么意思
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         // 1.查询接口信息
         List<InterfaceInfo> interfaceInfoList = this.list(this.getQueryWrapper(interfaceInfoQueryRequest));
@@ -272,6 +271,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
             // 设置requestParamsRemark、responseParamsRemark
             if (StrUtil.isNotBlank(interfaceInfo.getRequestParamsRemark())) { // 没有请求参数，requestParamsRemark为空
+                // 将json转为对象
                 Object requestParamsRemark = GSON.fromJson(interfaceInfo.getRequestParamsRemark(),
                         new TypeToken<List<RequestParamsRemarkVO>>() {
                         }.getType());

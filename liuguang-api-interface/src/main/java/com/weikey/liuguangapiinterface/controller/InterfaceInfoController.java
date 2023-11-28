@@ -199,32 +199,30 @@ public class InterfaceInfoController {
     // endregion
 
     /**
-     * 发布
+     * 发布接口
      * @param idRequest
-     * @param request
      * @return
      *
      * 发布接口和下线接口只需要一个参数 id，但是仍然封装为对象，这样的好处是：统一，所有 post 接口都是统一在请求体中传 json 串
      */
     @PostMapping("/online")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
-                                                     HttpServletRequest request) {
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest) {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = idRequest.getId();
-        // 1.判断是否存在
+        // 1.判断对应的接口是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
-        // 2.校验接口是否可以调用
+        // 2.使用反射校验接口是否可以调用
         // todo apiClient的ak、sk是配置文件写死的、某个管理员的
         // todo 待完善：这里上线接口也要管理员有相应接口的调用次数，需要改进
         String name = oldInterfaceInfo.getName();
         Method method = getMethod(name); // 方法对象
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Object result = null;
+        Class<?>[] parameterTypes = method.getParameterTypes(); // 方法参数类型
 
+        Object result = null;
         if (parameterTypes.length == 0) { // 2.1接口方法没有参数，直接调用
             try {
                 result = method.invoke(apiClient);
@@ -243,7 +241,7 @@ public class InterfaceInfoController {
         // todo 待完善：什么情况下接口校验失败
         ThrowUtils.throwIf(result == null, ErrorCode.SYSTEM_ERROR, "接口校验失败");
 
-        // 3.将接口信息的status字段改为1
+        // 3.更新接口状态：将接口信息的status字段改为1
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
@@ -252,25 +250,23 @@ public class InterfaceInfoController {
     }
 
     /**
-     * 下线
+     * 下线接口
      * @param idRequest
-     * @param request
      * @return
      *
      * 发布接口和下线接口只需要一个参数 id，但是仍然封装为对象，这样的好处是：统一，所有 post 接口都是统一在请求体中传 json 串
      */
     @PostMapping("/offline")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,
-                                                     HttpServletRequest request) {
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest) {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = idRequest.getId();
-        // 判断是否存在
+        // 判断接口是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
-        // 将接口信息的status字段改为0
+        // 更新接口状态：将接口信息的status字段改为0
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
