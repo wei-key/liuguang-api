@@ -6,12 +6,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>liuguang-api</artifactId>
-        <groupId>com.weikey</groupId>
-        <version>1.0.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.6.13</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <groupId>com.weikey</groupId>
     <artifactId>liuguang-api-sdk</artifactId>
+    <version>1.0.0</version>
 
     <dependencies>
         <dependency>
@@ -23,6 +26,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- https://hutool.cn/docs/index.html#/-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.8</version>
         </dependency>
 
         <dependency>

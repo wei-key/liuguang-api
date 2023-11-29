@@ -10,7 +10,6 @@
     <description>流光API</description>
     <modules>
         <module>liuguang-api-common</module>
-        <module>liuguang-api-sdk</module>
         <module>liuguang-api-gateway</module>
         <module>liuguang-api-user</module>
         <module>liuguang-api-interface</module>

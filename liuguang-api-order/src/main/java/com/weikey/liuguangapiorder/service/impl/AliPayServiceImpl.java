@@ -92,7 +92,6 @@ public class AliPayServiceImpl implements AliPayService {
             // 获取当前登录用户
             Long userId = JWTUtils.getUidFromToken(request);
 
-
             // 1.创建订单
             OrderInfo orderInfo = orderInfoService.createOrder(tradeSubmitRequest, PayType.ALIPAY.getValue(), userId);
 
