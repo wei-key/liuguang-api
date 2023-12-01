@@ -78,8 +78,7 @@ public class FlowLimitConfig {
         ApiDefinition api = new ApiDefinition("interface-service-api")
                 .setPredicateItems(new HashSet<ApiPredicateItem>() {{
                     // 设置规则
-                    add(new ApiPathPredicateItem().setPattern("/api/interface-service/resou/baidu"));
-                    add(new ApiPathPredicateItem().setPattern("/api/interface-service/event/today/in/history")
+                    add(new ApiPathPredicateItem().setPattern("/api/interface-service/**")
                                     .setMatchStrategy(SentinelGatewayConstants.URL_MATCH_STRATEGY_PREFIX)); // url前缀匹配
                 }});
         definitions.add(api);
@@ -94,8 +93,8 @@ public class FlowLimitConfig {
         // 设置api分组名称，需要与 initCustomizedApis 方法中定义的分组名称一致
         rules.add(new GatewayFlowRule("interface-service-api")
                 .setResourceMode(SentinelGatewayConstants.RESOURCE_MODE_CUSTOM_API_NAME)
-                // 限流阈值
-                .setCount(1)
+                // 限流阈值 todo 上线后阈值考虑多少合适
+                .setCount(5)
                 // 时间窗口
                 .setIntervalSec(1)
                 // 针对请求头accessKey进行限流

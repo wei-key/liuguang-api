@@ -4,16 +4,35 @@ import cn.hutool.core.util.StrUtil;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoGetRequest;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeCountRequest;
 import com.weikey.liuguangapicommon.model.entity.InterfaceInfo;
-import com.weikey.liuguangapicommon.model.entity.User;
-import com.weikey.liuguangapicommon.service.InterfaceFeignClient;
-import com.weikey.liuguangapicommon.service.UserFeignClient;
-import com.weikey.liuguangapisdk.exception.ApiError;
+import com.weikey.liuguangapicommopackage com.weikey.liuguangapiinterfaceservice.interceptor;
+
 import lombok.extern.slf4j.Slf4j;
-import org.reactivestreams.Publisher;
-import org.springframework.cloud.gateway.filter.GatewayFilter;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.core.Ordered;
-import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.HandlerInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+@Slf4j
+public class SourceInterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        //获取请求头中的source值
+        String value = request.getHeader("source");
+        //获取请求的本地地址
+        String localAddr = request.getLocalAddr();
+        //判断source值是否为gateway
+        if (!"gateway".equals(value)) {
+            //若不是，则记录日志，并返回403状态码
+            log.error("Request directly access to the interface without passing through the gateway. Request origin: " + localAddr);
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            return false;
+        }
+        //若是，则返回true
+        return true;
+    }
+
+}r;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -68,7 +87,7 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 1.请求日志
+        // 1.请求日志 todo 优化；打印为1行
         // todo 这里可能有空指针异常？
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
@@ -102,7 +121,7 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
         // 远程调用，去数据库根据accessKey查询secretKey
         User user = null;
         try {
-            user = userFeignClient.getInvokeUser(accessKey);
+            user = userFeignClient.getInvokeUser(accessKey); // todo 优化
         } catch (Exception e) {
             log.error("getInvokeUser error", e);
             return handleError(exchange, ApiError.INTERNAL_ERROR);

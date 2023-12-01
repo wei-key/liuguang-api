@@ -6,19 +6,18 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import com.weikey.liuguangapisdk.constant.HeaderConstant;
-import com.weikey.liuguangapisdk.dto.ResouRequest;
 import com.weikey.liuguangapisdk.dto.WeatherRequest;
 import com.weikey.liuguangapisdk.exception.ApiError;
 import com.weikey.liuguangapisdk.exception.ApiException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.weikey.liuguangapisdk.dto.ResouRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
-
 
 /**
  * 调用第三方接口的客户端

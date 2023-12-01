@@ -13,6 +13,6 @@ public class SignUtils {
      */
     public static String getSign(String param, String secretKey) {
         String data = param + "-" + secretKey;
-        return DigestUtil.md5Hex(data);
+        return DigestUtil.md5Hex(data); // todo 优化
     }
 }

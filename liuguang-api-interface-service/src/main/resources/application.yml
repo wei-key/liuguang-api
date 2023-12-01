@@ -9,12 +9,15 @@ server:
   port: 8405
   servlet:
     context-path: /api/interface-service # 访问前缀
+
+# todo 开源记得脱敏
+# todo 看下是否可以重置，先前已经将密钥暴露出去
 api:
   resou:
-    access-key: 427c354ff1ead77b8066e365a77615e1
-    secret-key: 31afa56880142282f9678a23d419ac01
+    access-key:
+    secret-key:
   weather:
-    appid: 56761788
-    appsecret: ti3hP8y9
+    appid:
+    appsecret:
 
 
