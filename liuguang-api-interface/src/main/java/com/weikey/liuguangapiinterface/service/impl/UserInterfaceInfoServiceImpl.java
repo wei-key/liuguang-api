@@ -106,6 +106,21 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     }
 
     /**
+     * 接口调用次数回滚
+     * @param userId
+     * @param interfaceInfoId
+     * @return
+     */
+    @Override
+    public boolean rollbackCount(long userId, long interfaceInfoId) {
+        ThrowUtils.throwIf(userId <= 0 || interfaceInfoId <= 0, ErrorCode.PARAMS_ERROR);
+        UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.setSql("totalNum = totalNum - 1, leftNum = leftNum + 1")
+                .eq("userId", userId).eq("interfaceInfoId", interfaceInfoId);
+        return this.update(updateWrapper);
+    }
+
+    /**
      * 分配接口的调用次数
      * todo 并发的考虑：是否存在并发的问题？
      * @param interfaceId 接口id

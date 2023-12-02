@@ -25,5 +25,7 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      */
     boolean invokeCount(long userId, long interfaceInfoId);
 
+    boolean rollbackCount(long userId, long interfaceInfoId);
+
     void addCount(long interfaceId, int amount, long userId);
 }
