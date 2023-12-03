@@ -17,10 +17,5 @@ public class InterfaceInfoGetRequest implements Serializable {
      */
     private String url;
 
-    /**
-     * 请求方式
-     */
-    private String method;
-
     private static final long serialVersionUID = 1L;
 }

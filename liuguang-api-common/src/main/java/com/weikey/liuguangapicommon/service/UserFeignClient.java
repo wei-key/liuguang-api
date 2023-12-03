@@ -1,9 +1,8 @@
 package com.weikey.liuguangapicommon.service;
 
 
-import com.weikey.liuguangapicommon.exception.BusinessException;
+import com.weikey.liuguangapicommon.model.dto.cache.UserCacheDto;
 import com.weikey.liuguangapicommon.model.entity.User;
-import com.weikey.liuguangapicommon.model.enums.ErrorCode;
 import com.weikey.liuguangapicommon.model.enums.UserRoleEnum;
 import com.weikey.liuguangapicommon.utils.JWTUtils;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -26,7 +25,7 @@ public interface UserFeignClient {
      * @return
      */
     @GetMapping("/get/invoke/user")
-    User getInvokeUser(@RequestParam("accessKey") String accessKey);
+    UserCacheDto getInvokeUser(@RequestParam("accessKey") String accessKey);
 
     /**
      * 获取当前登录用户

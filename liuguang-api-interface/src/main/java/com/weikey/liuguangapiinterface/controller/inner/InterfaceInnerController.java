@@ -2,6 +2,7 @@ package com.weikey.liuguangapiinterface.controller.inner;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.weikey.liuguangapicommon.exception.BusinessException;
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoGetRequest;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoActivateRequest;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeCountRequest;
@@ -71,14 +72,13 @@ public class InterfaceInnerController implements InterfaceFeignClient {
      */
     @PostMapping("/get/post")
     @Override
-    public InterfaceInfo getInterface(@RequestBody InterfaceInfoGetRequest interfaceInfoGetRequest) {
+    public InterfaceCacheDto getInterface(@RequestBody InterfaceInfoGetRequest interfaceInfoGetRequest) {
         String url = interfaceInfoGetRequest.getUrl();
-        String method = interfaceInfoGetRequest.getMethod();
         // 校验参数
-        if (ObjectUtil.hasEmpty(url, method)) {
+        if (ObjectUtil.hasEmpty(url)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        return interfaceInfoService.getInterface(url, method);
+        return interfaceInfoService.getInterface(url);
     }
 
     /**

@@ -15,6 +15,24 @@ spring:
     url: jdbc:mysql://localhost:3306/myapi
     username: root
     password: hsp
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 123321
+    # 需要手动配置连接池，连接池才会生效
+    # spring默认使用的是lettuce客户端
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: 100ms
+  rabbitmq:
+    host: 192.168.200.130
+    port: 5672
+    username: admin
+    password: 123456
+    virtualHost: /
   cloud:
     nacos:
       discovery:
@@ -37,5 +55,5 @@ knife4j:
   enable: true
 api:
   client:
-    access-key: ccce7bb610356c31709329e4f17de2f3
-    secret-key: 159b16c5775ca7d718a54aac1f7607d5
+    access-key: c49e88f15bb2ff68b97785795d6e6fd2
+    secret-key: 4e586c591d752d64bb8a65c93c75d9aa

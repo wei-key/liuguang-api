@@ -1,15 +1,18 @@
 package com.weikey.liuguangapigateway.filter;
 
 import cn.hutool.core.util.StrUtil;
+import com.google.gson.Gson;
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoGetRequest;
+import com.weikey.liuguangapicommon.model.dto.cache.UserCacheDto;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeCountRequest;
-import com.weikey.liuguangapicommon.model.entity.InterfaceInfo;
-import com.weikey.liuguangapicommon.model.entity.User;
 import com.weikey.liuguangapicommon.service.InterfaceFeignClient;
 import com.weikey.liuguangapicommon.service.UserFeignClient;
+import com.weikey.liuguangapigateway.config.RabbitmqConfig;
 import com.weikey.liuguangapisdk.exception.ApiError;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
@@ -34,6 +37,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.INTERFACE_EXCHANGE_NAME;
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.INTERFACE_ROUTINGKEY;
+import static com.weikey.liuguangapicommon.constant.RedisKeyConstant.*;
+import static com.weikey.liuguangapigateway.config.RabbitmqConfig.*;
 import static com.weikey.liuguangapigateway.utils.ResultUtils.handleError;
 import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
 
@@ -49,8 +56,6 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
      */
     private static final long FIVE_MINUTES = 5 * 60L;
 
-    private static final String REDIS_KEY = "api:sign:nonce:";
-
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
@@ -59,6 +64,11 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
 
     @Resource
     private InterfaceFeignClient interfaceFeignClient;
+
+    private final Gson gson = new Gson();
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
 
     /**
@@ -99,60 +109,82 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
             return handleError(exchange, ApiError.BLANK_HEADER);
         }
 
-        // 远程调用，去数据库根据accessKey查询secretKey
-        User user = null;
-        try {
-            user = userFeignClient.getInvokeUser(accessKey); // todo 优化
-        } catch (Exception e) {
-            log.error("getInvokeUser error", e);
-            return handleError(exchange, ApiError.INTERNAL_ERROR);
-        }
-        if (user == null) {
-            return handleError(exchange, ApiError.INVALID_ACCESSKEY);
+        // 3.1 根据accessKey查询得到secretKey和userId
+        // 1)）查询缓存
+        String userCacheStr = stringRedisTemplate.opsForValue().get(USER_KEY_PREFIX + accessKey);
+        // 2）缓存数据不存在，查询数据库，然后将数据存入 redis。
+        UserCacheDto userCacheDto = null;
+        if (userCacheStr  == null) {
+            try {
+                userCacheDto = userFeignClient.getInvokeUser(accessKey);
+            } catch (Exception e) {
+                log.error("getInvokeUser error", e);
+                return handleError(exchange, ApiError.INTERNAL_ERROR);
+            }
+            if (userCacheDto == null) {
+                return handleError(exchange, ApiError.INVALID_ACCESSKEY);
+            }
+            stringRedisTemplate.opsForValue().set(USER_KEY_PREFIX + accessKey, gson.toJson(userCacheDto), 1L, TimeUnit.HOURS);
+        } else { // 3）缓存数据存在，则直接从缓存中返回
+            userCacheDto = gson.fromJson(userCacheStr, UserCacheDto.class);
         }
 
-        String secretKey = user.getSecretKey();
-        // 签名是否一致
+
+        String secretKey = userCacheDto.getSecretKey();
+        // 3.2 签名是否一致
         if (!sign.equals(getSign(param, secretKey))) {
             return handleError(exchange, ApiError.SIGNATURE_FAILURE);
         }
 
-        // 校验时间戳是否在当前时间的 5分钟 范围内
+        // 3.3 校验时间戳是否在当前时间的 5分钟 范围内
         Long queryTime = Long.valueOf(timestamp);
         long currentTimeMillis = System.currentTimeMillis();
         if ((currentTimeMillis - queryTime) / 1000 > FIVE_MINUTES) {
             return handleError(exchange, ApiError.SIGNATURE_EXPIRE);
         }
 
-        // 查找 nonce 是否存在
-        String value = stringRedisTemplate.opsForValue().get(REDIS_KEY + nonce);
+        // 3.4 查找 nonce 是否存在
+        String value = stringRedisTemplate.opsForValue().get(NONCE_KEY_PREFIX + nonce);
         if (value == null) { // 不存在，保存 nonce，设置过期时间5分钟
-            stringRedisTemplate.opsForValue().set(REDIS_KEY + nonce, "1", 5, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(NONCE_KEY_PREFIX + nonce, "1", 5, TimeUnit.MINUTES);
         } else { // 存在，表示随机数使用过了，检验失败
             return handleError(exchange, ApiError.REQUEST_REPLAY);
         }
 
-        // 4.接口校验：请求的模拟接口是否存在，参数：请求地址、请求方式 todo 再加一个参数：请求参数
+        // 4.接口校验：请求的模拟接口是否存在
         // todo 校验接口状态
-        InterfaceInfo interfaceInfo = null;
-        InterfaceInfoGetRequest interfaceInfoGetRequest = new InterfaceInfoGetRequest();
-        interfaceInfoGetRequest.setUrl(path); // 请求路径
-        interfaceInfoGetRequest.setMethod(method);
-        try {
-            interfaceInfo = interfaceFeignClient.getInterface(interfaceInfoGetRequest);
-        } catch (Exception e) {
-            log.error("getInterface error", e);
-            return handleError(exchange, ApiError.INTERNAL_ERROR);
-        }
-        if (interfaceInfo == null) {
-            return handleError(exchange, ApiError.INTERFACE_NOT_FOUNT);
+        // 1)）查询缓存
+        String interfaceStr = stringRedisTemplate.opsForValue().get(INTERFACE_KEY_PREFIX + path);
+        InterfaceCacheDto interfaceCacheDto = null;
+        // 2）缓存数据不存在，查询数据库，然后将数据存入 redis。
+        if (interfaceStr  == null) {
+            try {
+                InterfaceInfoGetRequest interfaceInfoGetRequest = new InterfaceInfoGetRequest();
+                interfaceInfoGetRequest.setUrl(path);
+                interfaceCacheDto = interfaceFeignClient.getInterface(interfaceInfoGetRequest);
+            } catch (Exception e) {
+                log.error("getInterface error", e);
+                return handleError(exchange, ApiError.INTERNAL_ERROR);
+            }
+            if (interfaceCacheDto == null) {
+                return handleError(exchange, ApiError.INTERFACE_NOT_FOUNT);
+            }
+            stringRedisTemplate.opsForValue().set(INTERFACE_KEY_PREFIX + path, gson.toJson(interfaceCacheDto));
+        } else {  // 3）缓存数据存在，则直接从缓存中返回
+            interfaceCacheDto = gson.fromJson(interfaceStr, InterfaceCacheDto.class);
         }
 
-        // 5.统计接口调用次数，同时校验调用次数是否还有剩余
+        // 5.校验接口状态：开启/关闭
+        Integer status = interfaceCacheDto.getStatus();
+        if (status == 0) { // 接口关闭
+            return handleError(exchange, ApiError.INTERFACE_CLOSE);
+        }
+
+        // 6.统计接口调用次数，同时校验调用次数是否还有剩余
         Boolean result = null;
         UserInterfaceInfoInvokeCountRequest userInterfaceInfoInvokeCountRequest = new UserInterfaceInfoInvokeCountRequest();
-        userInterfaceInfoInvokeCountRequest.setInterfaceInfoId(interfaceInfo.getId());
-        userInterfaceInfoInvokeCountRequest.setUserId(user.getId());
+        userInterfaceInfoInvokeCountRequest.setInterfaceInfoId(interfaceCacheDto.getId());
+        userInterfaceInfoInvokeCountRequest.setUserId(userCacheDto.getUserId());
         // todo try...catch改为全局异常处理
         try {
             // 统计接口调用次数
@@ -168,10 +200,10 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
             return handleError(exchange, ApiError.COUNT_NOT_ENOUGH);
         }
 
-        return handleResponse(exchange, chain);
+        return handleResponse(exchange, chain, userInterfaceInfoInvokeCountRequest);
     }
 
-    private Mono<Void> handleResponse(ServerWebExchange exchange, GatewayFilterChain chain) {
+    private Mono<Void> handleResponse(ServerWebExchange exchange, GatewayFilterChain chain, UserInterfaceInfoInvokeCountRequest userInterfaceInfoInvokeCountRequest) {
 
         ServerHttpResponse originalResponse = exchange.getResponse();
         DataBufferFactory bufferFactory = originalResponse.bufferFactory();
@@ -197,7 +229,7 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
                         // 返回的数据
                         String respDataStr = new String(content, StandardCharsets.UTF_8);
 
-                        // 7.响应日志
+                        // 8.响应日志
                         log.info("response statusCode: " + statusCode);
                         log.info("response data: " + respDataStr);
 
@@ -206,13 +238,17 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
                     }));
                 } else { // 响应异常
                     // todo 这里响应返回很慢，backend一直拿不到响应
-                    // 8.todo 调用失败，返回规范错误码
+                    // 9.todo 调用失败，返回规范错误码
                     log.error("revoke fail, response statusCode: " + statusCode);
+
+                    // 发送消息，回滚被扣减的调用次数
+                    rabbitTemplate.convertAndSend(INTERFACE_EXCHANGE_NAME, INTERFACE_ROUTINGKEY, userInterfaceInfoInvokeCountRequest);
+
                     return handleError(exchange, ApiError.INVOKE_FAILURE);
                 }
             }
         };
-        // 6.请求转发，调用接口
+        // 7.请求转发，调用接口
         // 设置response对象为修饰过的
         return chain.filter(exchange.mutate().response(decoratedResponse).build());
     }

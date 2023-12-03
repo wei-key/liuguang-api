@@ -5,6 +5,7 @@ package com.weikey.liuguangapiinterface.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.weikey.liuguangapicommon.model.entity.InterfaceInfo;
 import com.weikey.liuguangapicommon.model.response.BaseResponse;
@@ -72,5 +73,5 @@ public interface InterfaceInfoService extends IService<InterfaceInfo> {
      */
     BaseResponse<InterfaceInfoInvokeVO> getInterfaceInfoInvokeVOById(long id, HttpServletRequest request);
 
-    InterfaceInfo getInterface(String url, String method);
+    InterfaceCacheDto getInterface(String url);
 }

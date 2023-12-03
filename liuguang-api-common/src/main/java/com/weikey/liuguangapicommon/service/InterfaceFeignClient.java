@@ -1,6 +1,7 @@
 package com.weikey.liuguangapicommon.service;
 
 
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoGetRequest;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoActivateRequest;
 import com.weikey.liuguangapicommon.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeCountRequest;
@@ -41,7 +42,7 @@ public interface InterfaceFeignClient {
      * @return
      */
     @PostMapping("/get/post")
-    InterfaceInfo getInterface(@RequestBody InterfaceInfoGetRequest interfaceInfoGetRequest);
+    InterfaceCacheDto getInterface(@RequestBody InterfaceInfoGetRequest interfaceInfoGetRequest);
 
     /**
      * 调用接口次数统计

@@ -13,7 +13,8 @@ public enum ApiError {
     INTERNAL_ERROR("InternalError", "A error occurred inside the system."),
     INVOKE_FAILURE("InvokeFailure", "Invoking the interface failed."),
     REQUEST_REPLAY("RequestReplay", "The request is replayed from an old one."),
-    FLOW_CONTROL("FlowControl", "The request is limited by flow control.");
+    FLOW_CONTROL("FlowControl", "The request is limited by flow control."),
+    INTERFACE_CLOSE("InterfaceClose", "The interface has been closed.");
 
 
     /**

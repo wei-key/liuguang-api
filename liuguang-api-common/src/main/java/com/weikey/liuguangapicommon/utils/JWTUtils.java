@@ -25,7 +25,7 @@ public class JWTUtils {
     /**
      * 密钥：使用的签名算法是HmacSHA256，密钥长度建议是256bit（32byte），刚好是32个英文或数字字符
      */
-    private static final String SECRET = ""; // todo 开源之前记得脱敏
+    private static final String SECRET = "jfeiGEiA472GFeChf37H7dE3VeifFH4v"; // todo 开源之前记得脱敏
 
     /**
      * token过期时间，单位：天

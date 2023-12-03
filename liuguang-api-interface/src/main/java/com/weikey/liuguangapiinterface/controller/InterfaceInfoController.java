@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.weikey.liuguangapicommon.annotation.AuthCheck;
 import com.weikey.liuguangapicommon.constant.UserConstant;
 import com.weikey.liuguangapicommon.exception.BusinessException;
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.common.DeleteRequest;
 import com.weikey.liuguangapicommon.model.dto.common.IdRequest;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoAddRequest;
@@ -25,12 +26,16 @@ import com.weikey.liuguangapicommon.utils.ThrowUtils;
 import com.weikey.liuguangapiinterface.service.InterfaceInfoService;
 import com.weikey.liuguangapisdk.client.ApiClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static com.weikey.liuguangapicommon.constant.RedisKeyConstant.INTERFACE_KEY_PREFIX;
 
 /**
  * 接口信息接口
@@ -50,7 +55,10 @@ public class InterfaceInfoController {
     @Resource
     private UserFeignClient userFeignClient;
 
-    private final static Gson GSON = new Gson();
+    private final Gson gson = new Gson();
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     // region 增删改查 todo 这里的增删改查需要完善
 
@@ -68,8 +76,8 @@ public class InterfaceInfoController {
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         // todo 校验是否发生异常：requestParamsRemark、responseParamsRemark是不同类型
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfo); // 将参数对象转化为实体对象
-        interfaceInfo.setRequestParamsRemark(GSON.toJson(interfaceInfoAddRequest.getRequestParamsRemark()));
-        interfaceInfo.setResponseParamsRemark(GSON.toJson(interfaceInfoAddRequest.getResponseParamsRemark()));
+        interfaceInfo.setRequestParamsRemark(gson.toJson(interfaceInfoAddRequest.getRequestParamsRemark()));
+        interfaceInfo.setResponseParamsRemark(gson.toJson(interfaceInfoAddRequest.getResponseParamsRemark()));
 
         // todo 参数校验完善？
         interfaceInfoService.validInterfaceInfo(interfaceInfo, true); // 参数校验
@@ -121,8 +129,8 @@ public class InterfaceInfoController {
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         // todo 校验是否发生异常：requestParamsRemark、responseParamsRemark是不同类型
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfo);
-        interfaceInfo.setRequestParamsRemark(GSON.toJson(interfaceInfoUpdateRequest.getRequestParamsRemark()));
-        interfaceInfo.setResponseParamsRemark(GSON.toJson(interfaceInfoUpdateRequest.getResponseParamsRemark()));
+        interfaceInfo.setRequestParamsRemark(gson.toJson(interfaceInfoUpdateRequest.getRequestParamsRemark()));
+        interfaceInfo.setResponseParamsRemark(gson.toJson(interfaceInfoUpdateRequest.getResponseParamsRemark()));
 
         // 参数校验
         // todo 参数校验完善？
@@ -207,6 +215,7 @@ public class InterfaceInfoController {
      */
     @PostMapping("/online")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @Transactional(rollbackFor = Exception.class)
     public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest) {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -215,37 +224,45 @@ public class InterfaceInfoController {
         // 1.判断对应的接口是否存在
         InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
         ThrowUtils.throwIf(oldInterfaceInfo == null, ErrorCode.NOT_FOUND_ERROR);
+
+
         // 2.使用反射校验接口是否可以调用
         // todo apiClient的ak、sk是配置文件写死的、某个管理员的
         // todo 待完善：这里上线接口也要管理员有相应接口的调用次数，需要改进
-        String name = oldInterfaceInfo.getName();
-        Method method = getMethod(name); // 方法对象
-        Class<?>[] parameterTypes = method.getParameterTypes(); // 方法参数类型
-
-        Object result = null;
-        if (parameterTypes.length == 0) { // 2.1接口方法没有参数，直接调用
-            try {
-                result = method.invoke(apiClient);
-            } catch (Exception e) { // 接口调用失败的异常也会在这里被处理
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
-            }
-        } else { // 2.2接口方法有参数
-            try {
-                // 直接new对象即可，属性有默认值
-                Object req = parameterTypes[0].newInstance();
-                result = method.invoke(apiClient, req);
-            } catch (Exception e) { // 接口调用失败的异常也会在这里被处理
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
-            }
-        }
-        // todo 待完善：什么情况下接口校验失败
-        ThrowUtils.throwIf(result == null, ErrorCode.SYSTEM_ERROR, "接口校验失败");
+//        String name = oldInterfaceInfo.getName();
+//        Method method = getMethod(name); // 方法对象
+//        Class<?>[] parameterTypes = method.getParameterTypes(); // 方法参数类型
+//
+//        Object result = null;
+//        if (parameterTypes.length == 0) { // 2.1接口方法没有参数，直接调用clazz = {Class@7358} "class com.weikey.liuguangapisdk.client.ApiClient"… Navigate
+//            try {
+//                result = method.invoke(apiClient);
+//            } catch (Exception e) { // 接口调用失败的异常也会在这里被处理
+//                throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
+//            }
+//        } else { // 2.2接口方法有参数
+//            try {
+//                // 直接new对象即可，属性有默认值
+//                Object req = parameterTypes[0].newInstance();
+//                result = method.invoke(apiClient, req);
+//            } catch (Exception e) { // 接口调用失败的异常也会在这里被处理
+//                throw new BusinessException(ErrorCode.SYSTEM_ERROR, e.getMessage());
+//            }
+//        }
+//        // todo 待完善：什么情况下接口校验失败detailMessage = null
+//        ThrowUtils.throwIf(result == null, ErrorCode.SYSTEM_ERROR, "接口校验失败");
 
         // 3.更新接口状态：将接口信息的status字段改为1
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        interfaceInfo.setPrice(null);
         boolean update = interfaceInfoService.updateById(interfaceInfo);
+
+        // 4.更新缓存
+        InterfaceCacheDto interfaceCacheDto = new InterfaceCacheDto(id, InterfaceInfoStatusEnum.ONLINE.getValue());
+        stringRedisTemplate.opsForValue().set(INTERFACE_KEY_PREFIX + oldInterfaceInfo.getUrl(), gson.toJson(interfaceCacheDto));
+
         return ResultUtils.success(update);
     }
 
@@ -258,6 +275,7 @@ public class InterfaceInfoController {
      */
     @PostMapping("/offline")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @Transactional(rollbackFor = Exception.class)
     public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest) {
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -270,7 +288,13 @@ public class InterfaceInfoController {
         InterfaceInfo interfaceInfo = new InterfaceInfo();
         interfaceInfo.setId(id);
         interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        interfaceInfo.setPrice(null);
         boolean result = interfaceInfoService.updateById(interfaceInfo);
+
+        // 更新缓存
+        InterfaceCacheDto interfaceCacheDto = new InterfaceCacheDto(id, InterfaceInfoStatusEnum.OFFLINE.getValue());
+        stringRedisTemplate.opsForValue().set(INTERFACE_KEY_PREFIX + oldInterfaceInfo.getUrl(), gson.toJson(interfaceCacheDto));
+
         return ResultUtils.success(result);
     }
 
@@ -316,7 +340,7 @@ public class InterfaceInfoController {
         } else { // 3.2接口方法有参数
             String json = interfaceInfoInvokeRequest.getRequestParams();
             // json转为java对象可能会出现异常，由全局异常处理器处理
-            Object req = GSON.fromJson(json, parameterTypes[0]); // json转为req对象
+            Object req = gson.fromJson(json, parameterTypes[0]); // json转为req对象
             try {
                 result = method.invoke(apiClient, req);
             } catch (Exception e) {

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.ORDER_DELAY_ROUTINGKEY;
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.ORDER_EXCHANGE_NAME;
+
 /**
  * 发送消息
  */
@@ -57,6 +60,6 @@ public class MessageService implements RabbitTemplate.ConfirmCallback, RabbitTem
         CorrelationData correlationData = new CorrelationData();
         correlationData.setId(orderInfo.getOrderNo()); // 设置订单ID，在confirm回调里，就可以知道是哪个订单没有发送到交换机上去
         // void convertAndSend(String exchange, String routingKey, Object message, CorrelationData correlationData)
-        rabbitTemplate.convertAndSend(RabbitmqConfig.ORDER_EXCHANGE_NAME, RabbitmqConfig.ORDER_DELAY_ROUTINGKEY, orderInfo, correlationData);
+        rabbitTemplate.convertAndSend(ORDER_EXCHANGE_NAME, ORDER_DELAY_ROUTINGKEY, orderInfo, correlationData);
     }
 }

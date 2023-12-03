@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.io.IOException;
 
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.ORDER_DLX_QUEUE_NAME;
+
 @Component
 @Slf4j
 public class MessageListener {
@@ -29,7 +31,7 @@ public class MessageListener {
      * @param message
      * @param channel
      */
-    @RabbitListener(queues = {RabbitmqConfig.ORDER_DLX_QUEUE_NAME})
+    @RabbitListener(queues = {ORDER_DLX_QUEUE_NAME})
     public void receiveMsg(OrderInfo orderInfo, Message message, Channel channel) {
         log.info("监听队列拿到延时消息...");
 

@@ -11,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.weikey.liuguangapicommon.constant.CommonConstant;
 import com.weikey.liuguangapicommon.constant.MethodConstant;
 import com.weikey.liuguangapicommon.exception.BusinessException;
+import com.weikey.liuguangapicommon.model.dto.cache.InterfaceCacheDto;
 import com.weikey.liuguangapicommon.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.weikey.liuguangapicommon.model.entity.InterfaceInfo;
 import com.weikey.liuguangapicommon.model.entity.UserInterfaceInfo;
@@ -331,12 +332,18 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     }
 
     @Override
-    public InterfaceInfo getInterface(String url, String method) {
-        ThrowUtils.throwIf(StringUtils.isAnyBlank(url, method), ErrorCode.PARAMS_ERROR);
+    public InterfaceCacheDto getInterface(String url) {
+        ThrowUtils.throwIf(StringUtils.isAnyBlank(url), ErrorCode.PARAMS_ERROR);
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("url", url);
-        queryWrapper.eq("method", method);
-        return interfaceInfoMapper.selectOne(queryWrapper);
+        InterfaceInfo interfaceInfo = interfaceInfoMapper.selectOne(queryWrapper);
+        if (interfaceInfo == null) {
+            return null;
+        } else {
+            InterfaceCacheDto interfaceCacheDto = new InterfaceCacheDto();
+            BeanUtils.copyProperties(interfaceInfo, interfaceCacheDto);
+            return interfaceCacheDto;
+        }
     }
 
 }

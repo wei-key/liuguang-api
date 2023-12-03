@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.weikey.liuguangapicommon.constant.CommonConstant;
 import com.weikey.liuguangapicommon.exception.BusinessException;
 import com.weikey.liuguangapicommon.model.dto.common.JwtUserDto;
+import com.weikey.liuguangapicommon.model.dto.cache.UserCacheDto;
 import com.weikey.liuguangapicommon.model.dto.user.UserQueryRequest;
 import com.weikey.liuguangapicommon.model.entity.User;
 import com.weikey.liuguangapicommon.model.enums.ErrorCode;
@@ -22,7 +23,9 @@ import com.weikey.liuguangapiuser.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
@@ -31,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.weikey.liuguangapicommon.constant.RedisKeyConstant.USER_KEY_PREFIX;
 
 
 /**
@@ -49,6 +53,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -291,20 +298,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public boolean updateKey(long id) {
+    @Transactional(rollbackFor =  Exception.class)
+    public boolean resetKey(long id) {
+        // 更新数据库
         User user = this.getById(id);
+        String oldAccessKey = user.getAccessKey();
         String accessKey = DigestUtil.md5Hex(SALT + user.getUserAccount() + RandomUtil.randomNumbers(5));
         String secretKey = DigestUtil.md5Hex(SALT + user.getUserAccount() + RandomUtil.randomNumbers(8));
         user.setSecretKey(secretKey);
         user.setAccessKey(accessKey);
-        return this.updateById(user);
+        this.updateById(user);
+        // 删除缓存
+        stringRedisTemplate.opsForValue().getOperations().delete(USER_KEY_PREFIX + oldAccessKey);
+        return true;
     }
 
     @Override
-    public User getInvokeUser(String accessKey) {
+    public UserCacheDto getInvokeUser(String accessKey) {
         ThrowUtils.throwIf(StringUtils.isAnyBlank(accessKey), ErrorCode.PARAMS_ERROR);
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("accessKey", accessKey);
-        return userMapper.selectOne(queryWrapper);
+        User user = userMapper.selectOne(queryWrapper);
+
+        UserCacheDto userCacheDto = new UserCacheDto();
+        userCacheDto.setUserId(user.getId());
+        userCacheDto.setSecretKey(user.getSecretKey());
+        return userCacheDto;
     }
 }

@@ -5,22 +5,14 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.*;
+
 /**
  * 声明订单支付超时需要用到的交换机和队列
  */
 @Configuration
 @Slf4j
 public class RabbitmqConfig {
-
-    public static final String ORDER_EXCHANGE_NAME = "order.exchange";
-
-    public static final String ORDER_DELAY_QUEUE_NAME = "order.delay.queue";
-
-    public static final String ORDER_DLX_QUEUE_NAME = "order.dlx.queue";
-
-    public static final String ORDER_DELAY_ROUTINGKEY = "order.delay.routingkey";
-
-    public static final String ORDER_DLX_ROUTINGKEY = "order.dlx.routingkey";
 
     // 声明交换机，既作正常交换机，又作死信交换机
     @Bean

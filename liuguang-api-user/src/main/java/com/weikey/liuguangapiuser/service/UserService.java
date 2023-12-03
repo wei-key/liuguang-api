@@ -3,13 +3,13 @@ package com.weikey.liuguangapiuser.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.weikey.liuguangapicommon.model.dto.cache.UserCacheDto;
 import com.weikey.liuguangapicommon.model.dto.user.UserQueryRequest;
 import com.weikey.liuguangapicommon.model.entity.User;
 import com.weikey.liuguangapicommon.model.vo.LoginUserVO;
 import com.weikey.liuguangapicommon.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -34,8 +34,6 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount  用户账户
      * @param userPassword 用户密码
-     * @param request
-     * @param response
      * @return 脱敏后的用户信息
      */
     LoginUserVO userLogin(String userAccount, String userPassword);
@@ -43,8 +41,6 @@ public interface UserService extends IService<User> {
     /**
      * 用户登录（微信开放平台）
      *
-     * @param wxOAuth2UserInfo 从微信获取的用户信息
-     * @param request
      * @return 脱敏后的用户信息
      */
     //LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request);
@@ -125,7 +121,7 @@ public interface UserService extends IService<User> {
      * @param id 用户id
      * @return
      */
-    boolean updateKey(long id);
+    boolean resetKey(long id);
 
-    User getInvokeUser(String accessKey);
+    UserCacheDto getInvokeUser(String accessKey);
 }
