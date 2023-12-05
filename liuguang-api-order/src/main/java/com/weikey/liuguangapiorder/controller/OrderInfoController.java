@@ -42,7 +42,7 @@ public class OrderInfoController {
     private UserFeignClient userFeignClient;
 
     /**
-     * 获取当前用户的订单列表
+     * 分页获取当前用户的订单列表，根据下单时间降序排列
      *
      * @param orderInfoPageRequest
      * @param request
@@ -50,14 +50,15 @@ public class OrderInfoController {
      */
     @PostMapping("/page")
     public BaseResponse<Page<OrderInfo>> listOrderPageByCreateTimeDesc(@RequestBody OrderInfoPageRequest orderInfoPageRequest, HttpServletRequest request) {
-        // 获取当前登录用户
+        // JWTUtils.getUidFromToken(request)：获取当前登录用户的id
         return orderInfoService.listOrderPageByCreateTimeDesc(orderInfoPageRequest, JWTUtils.getUidFromToken(request));
     }
 
     /**
      * 用户取消订单
      *
-     * @param orderNo
+     * @param orderNo 订单编号
+     * @return
      */
     @PostMapping("/cancel")
     public BaseResponse<Boolean> cancelOrder(String orderNo) {

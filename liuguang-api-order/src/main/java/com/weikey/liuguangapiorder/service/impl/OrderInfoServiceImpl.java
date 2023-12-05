@@ -81,8 +81,8 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         if (orderInfoPageRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long current = orderInfoPageRequest.getCurrent();
-        long pageSize = orderInfoPageRequest.getPageSize();
+        long current = orderInfoPageRequest.getCurrent(); // 当前页码
+        long pageSize = orderInfoPageRequest.getPageSize(); // 一页的大小
 
         // 限制爬虫: 如果一次性获取太多条数据，视为爬虫，报错
         ThrowUtils.throwIf(pageSize > 20, ErrorCode.PARAMS_ERROR);

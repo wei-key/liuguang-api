@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.INTERFACE_EXCHANGE_NAME;
 import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.INTERFACE_ROUTINGKEY;
 import static com.weikey.liuguangapicommon.constant.RedisKeyConstant.*;
-import static com.weikey.liuguangapigateway.config.RabbitmqConfig.*;
 import static com.weikey.liuguangapigateway.utils.ResultUtils.handleError;
 import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
 
