@@ -165,7 +165,7 @@ public class AliPayServiceImpl implements AliPayService {
             // 2.记录支付日志
             paymentInfoService.createPaymentInfo(params);
 
-            // 3.分配接口的调用次数
+            // 3.远程调用：分配接口的调用次数
             interfaceFeignClient.addCount(new UserInterfaceInfoActivateRequest(orderInfo.getInterfaceId(), orderInfo.getAmount(), orderInfo.getUserId()));
         }
 

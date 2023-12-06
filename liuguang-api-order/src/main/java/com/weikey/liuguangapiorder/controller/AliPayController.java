@@ -41,7 +41,6 @@ public class AliPayController {
     /**
      * 下单接口
      *
-     * @param
      * @return
      */
     @PostMapping("/trade/submit")
@@ -68,8 +67,9 @@ public class AliPayController {
         String result = "failure";
 
         // 异步通知验签
-        boolean signVerified = false; // 调用SDK验证签名
+        boolean signVerified = false;
         try {
+            // 调用SDK验证签名
             signVerified = AlipaySignature.rsaCheckV1(
                     params,
                     config.getProperty("alipay.alipay-public-key"),
@@ -79,8 +79,8 @@ public class AliPayController {
             e.printStackTrace();
         }
 
+        // 验签失败则记录异常日志，并在response中返回failure.
         if (!signVerified) {
-            // 验签失败则记录异常日志，并在response中返回failure.
             log.error("支付成功异步通知验签失败！");
             return result;
         }

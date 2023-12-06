@@ -43,10 +43,12 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         paymentInfo.setTransactionId(transactionId);
         paymentInfo.setPayFee(totalAmountInt);
 
+        // 序列化
         Gson gson = new Gson();
         String json = gson.toJson(params, HashMap.class);
         paymentInfo.setContent(json);
 
+        // 执行插入操作
         baseMapper.insert(paymentInfo);
     }
 
