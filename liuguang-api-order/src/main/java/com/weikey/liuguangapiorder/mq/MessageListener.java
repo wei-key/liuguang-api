@@ -26,7 +26,7 @@ public class MessageListener {
     private AliPayService aliPayService;
 
     /**
-     * 监听死信队列，拿到超时的消息
+     * 监听死信队列，拿到超时的订单
      * @param orderInfo 可以直接拿到订单对象
      * @param message
      * @param channel

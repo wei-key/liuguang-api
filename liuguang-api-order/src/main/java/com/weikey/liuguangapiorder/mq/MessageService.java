@@ -14,7 +14,7 @@ import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.ORDER_DELAY
 import static com.weikey.liuguangapicommon.constant.RabbitMQConstant.ORDER_EXCHANGE_NAME;
 
 /**
- * 发送消息
+ * 发送订单消息
  */
 @Service
 @Slf4j
@@ -53,7 +53,7 @@ public class MessageService implements RabbitTemplate.ConfirmCallback, RabbitTem
     }
 
     /**
-     * 发送消息
+     * 发送订单消息
      */
     public void sendMessage(OrderInfo orderInfo) {
         // Confirm关联数据对象

@@ -80,8 +80,8 @@ public class AliPayServiceImpl implements AliPayService {
             }
 
             Long interfaceId = tradeSubmitRequest.getInterfaceId();
-            Integer totalFee = tradeSubmitRequest.getTotalFee();
-            Integer amount = tradeSubmitRequest.getAmount();
+            Integer totalFee = tradeSubmitRequest.getTotalFee(); // 订单金额(单位：分)
+            Integer amount = tradeSubmitRequest.getAmount(); // 接口调用次数
 
             if (interfaceId == null || interfaceId <= 0
                     || totalFee == null || totalFee < 0
@@ -95,7 +95,7 @@ public class AliPayServiceImpl implements AliPayService {
             // 1.创建订单
             OrderInfo orderInfo = orderInfoService.createOrder(tradeSubmitRequest, PayType.ALIPAY.getValue(), userId);
 
-            // 2.发送订单消息
+            // 2.发送订单消息（订单超时取消功能）
             messageService.sendMessage(orderInfo);
 
             // 3.调用支付宝接口
@@ -119,13 +119,13 @@ public class AliPayServiceImpl implements AliPayService {
 
             alipayTradePagePayRequest.setBizContent(bizContent.toString());
 
-            //执行请求，调用支付宝接口
+            // 执行请求，调用支付宝接口
             AlipayTradePagePayResponse response = alipayClient.pageExecute(alipayTradePagePayRequest);
 
-            if (response.isSuccess()) {
+            if (response.isSuccess()) { // 成功
                 log.info("调用支付宝下单接口成功");
                 return response.getBody();
-            } else {
+            } else { // 失败
                 log.info("调用支付宝下单接口失败，返回码 ===> " + response.getCode() + ", 返回描述 ===> " + response.getMsg());
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "调用支付宝下单接口失败");
             }

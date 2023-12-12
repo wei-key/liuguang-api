@@ -67,7 +67,7 @@ public class GlobalAuthFilter implements GlobalFilter, Ordered {
         }
         // 2.2 从请求头中取出 token，进行 token 校验
         String header = request.getHeaders().getFirst(JWTUtils.AUTHORIZATION);
-        boolean resutl = JWTUtils.verify(header);
+        boolean resutl = JWTUtils.verify(header); // jwt校验
         if (!resutl) { // 校验失败
             BaseResponse baseResponse = ResultUtils.error(ErrorCode.NOT_LOGIN_ERROR, "登录校验失败，请登录！");
             DataBufferFactory dataBufferFactory = response.bufferFactory();
