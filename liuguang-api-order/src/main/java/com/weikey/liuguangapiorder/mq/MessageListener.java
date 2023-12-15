@@ -56,9 +56,9 @@ public class MessageListener {
             try {
                 // 第3个参数如果为true，表示消息被Nack后，重新发送到队列
                 // void basicNack(long deliveryTag, boolean multiple, boolean requeue)
-                // 没有让消息重新投递，
+                // 没有让消息重新投递
                 channel.basicNack(deliveryTag, false, false);
-                log.error("订单消息处理发生异常, error ===> {}", e);
+                log.error("订单消息处理发生异常, error ===> {}", e); // 记录异常
             } catch (IOException ex) {
                 ex.printStackTrace();
             }

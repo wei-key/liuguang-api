@@ -31,6 +31,7 @@ public class MessageService implements RabbitTemplate.ConfirmCallback, RabbitTem
     }
 
     /**
+     * 消息可靠性
      * 交换机收到消息后，会回调该方法
      *
      * @param correlationData  相关联的数据
@@ -45,6 +46,7 @@ public class MessageService implements RabbitTemplate.ConfirmCallback, RabbitTem
     }
 
     /**
+     * 消息可靠性
      * 当消息从交换机没有正确地到达队列，则会触发该方法
      */
     @Override

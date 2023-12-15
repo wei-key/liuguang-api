@@ -33,7 +33,7 @@ public class MessageListener {
     @RabbitListener(queuesToDeclare = { @Queue(INTERFACE_QUEUE_NAME)})
     public void receiveMsg(UserInterfaceInfoInvokeCountRequest userInterfaceInfoInvokeCountRequest, Message message, Channel channel) {
         log.info("监听队列拿到消息: {}", userInterfaceInfoInvokeCountRequest);
-
+        // 执行调用次数的回滚操作
         userInterfaceInfoService.rollbackCount(userInterfaceInfoInvokeCountRequest.getUserId(), userInterfaceInfoInvokeCountRequest.getInterfaceInfoId());
 
     }
