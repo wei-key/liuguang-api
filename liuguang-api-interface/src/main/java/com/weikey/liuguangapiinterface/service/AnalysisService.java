@@ -3,6 +3,7 @@ package com.weikey.liuguangapiinterface.service;
 
 import com.weikey.liuguangapicommon.model.response.BaseResponse;
 import com.weikey.liuguangapicommon.model.vo.InterfaceInfoCountVO;
+import com.weikey.liuguangapicommon.model.vo.RankingVO;
 
 import java.util.List;
 
@@ -16,4 +17,5 @@ public interface AnalysisService {
       */
      BaseResponse<List<InterfaceInfoCountVO>> listTopInvokeInterface(int n);
 
+    BaseResponse<List<RankingVO>> interfaceRank(int n);
 }

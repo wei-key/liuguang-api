@@ -4,6 +4,7 @@ import com.weikey.liuguangapicommon.annotation.AuthCheck;
 import com.weikey.liuguangapicommon.constant.UserConstant;
 import com.weikey.liuguangapicommon.model.response.BaseResponse;
 import com.weikey.liuguangapicommon.model.vo.InterfaceInfoCountVO;
+import com.weikey.liuguangapicommon.model.vo.RankingVO;
 import com.weikey.liuguangapiinterface.service.impl.AnalysisServiceImpl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,5 +35,17 @@ public class AnalysisController {
     public BaseResponse<List<InterfaceInfoCountVO>> listTopInvokeInterface() {
         // todo 这里先写死了3个
         return analysisService.listTopInvokeInterface(3);
+    }
+
+    /**
+     * 接口次数排行榜
+     *
+     * @return 接口信息及总调用次数
+     */
+    @GetMapping("/ranking/list")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<List<RankingVO>> interfaceRank() {
+        // todo 这里先写死了3个
+        return analysisService.interfaceRank(5);
     }
 }

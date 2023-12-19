@@ -34,9 +34,9 @@
 
 ![主页](image/management.png)
 
-统计分析：接口调用次数统计，并用图表呈现
+接口排行榜：统计各接口调用次数，进行排序展示
 
-![主页](image/analysis.png)
+![主页](image/ranking.png)
 
 个人中心：查看个人信息，查看密钥，重置密钥
 

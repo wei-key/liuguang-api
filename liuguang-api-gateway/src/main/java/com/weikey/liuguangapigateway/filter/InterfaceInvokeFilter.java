@@ -232,6 +232,9 @@ public class InterfaceInvokeFilter implements GatewayFilter, Ordered {
                         log.info("response statusCode: " + statusCode);
                         log.info("response data: " + respDataStr);
 
+                        // 9.排行榜次数统计
+                        stringRedisTemplate.opsForZSet().incrementScore(RANKING_KEY, userInterfaceInfoInvokeCountRequest.getInterfaceInfoId().toString(), 1);
+
                         byte[] respData = respDataStr.getBytes();
                         return bufferFactory.wrap(respData);
                     }));
