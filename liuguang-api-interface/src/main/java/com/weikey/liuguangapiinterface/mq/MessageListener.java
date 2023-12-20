@@ -27,7 +27,8 @@ public class MessageListener {
 
     /**
      * 监听队列，拿到消息
-     * @param message
+     * @param userInterfaceInfoInvokeCountRequest 直接拿到消息对象
+     * @param message 消息
      * @param channel
      */
     @RabbitListener(queuesToDeclare = { @Queue(INTERFACE_QUEUE_NAME)})

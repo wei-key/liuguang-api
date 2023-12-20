@@ -28,7 +28,7 @@ public class MessageListener {
     /**
      * 监听死信队列，拿到超时的订单
      * @param orderInfo 可以直接拿到订单对象
-     * @param message
+     * @param message 消息
      * @param channel
      */
     @RabbitListener(queues = {ORDER_DLX_QUEUE_NAME})
@@ -43,8 +43,9 @@ public class MessageListener {
             OrderInfo orderByNo = orderInfoService.getOrderByOrderNo(orderInfo.getOrderNo());
 
             // 订单状态是未支付，进行相应处理
-            // 消息幂等性：重复接收消息后，订单状态已更改，业务不会重复执行
+            // 消息幂等性：重复接收消息后，订单状态已更改，业务不会重复执行（根据业务进行幂等性的判断）
             if (orderByNo != null && OrderStatus.NOTPAY.getValue() == orderByNo.getOrderStatus()) {
+                // 检查订单状态，并进行相应处理
                 aliPayService.checkOrderStatus(orderByNo);
             }
 
