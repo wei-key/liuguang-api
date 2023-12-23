@@ -126,7 +126,7 @@ public class AliPayController {
             return result;
         }
 
-        // 处理业务：修改订单状态，记录支付日志，分配接口的调用次数
+        // 处理业务：修改订单状态，记录支付日志，分配接口的调用次数（开启分布式事务保证一致性）
         aliPayService.processOrder(params);
 
         // 校验成功后在response中返回success并继续商户自身业务处理，校验失败返回failure

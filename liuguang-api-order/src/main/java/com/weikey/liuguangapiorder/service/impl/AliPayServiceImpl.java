@@ -137,6 +137,7 @@ public class AliPayServiceImpl implements AliPayService {
 
     /**
      * 处理订单
+     * 方法的业务场景中涉及跨服务的远程调用，需要开启分布式事务保证数据的一致性
      *
      * @param params
      */
