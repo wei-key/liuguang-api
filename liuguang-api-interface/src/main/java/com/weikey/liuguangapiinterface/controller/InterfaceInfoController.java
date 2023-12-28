@@ -26,6 +26,7 @@ import com.weikey.liuguangapicommon.utils.ThrowUtils;
 import com.weikey.liuguangapiinterface.service.InterfaceInfoService;
 import com.weikey.liuguangapisdk.client.ApiClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -50,15 +51,15 @@ public class InterfaceInfoController {
     private InterfaceInfoService interfaceInfoService;
 
     @Resource
-    private ApiClient apiClient;
-
-    @Resource
     private UserFeignClient userFeignClient;
 
     private final Gson gson = new Gson();
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${api.client.gateway-address}")
+    private String gatewayAddress;
 
     // region 增删改查 todo 这里的增删改查需要完善
 
@@ -323,7 +324,7 @@ public class InterfaceInfoController {
         User loginUser = userFeignClient.getLoginUser(JWTUtils.getUidFromToken(request)); // 获取当前登录用户
         String accessKey = loginUser.getAccessKey();
         String secretKey = loginUser.getSecretKey();
-        ApiClient apiClient = new ApiClient(accessKey, secretKey);
+        ApiClient apiClient = new ApiClient(accessKey, secretKey, gatewayAddress);
 
         String name = oldInterfaceInfo.getName();
         Method method = getMethod(name); // 方法对象

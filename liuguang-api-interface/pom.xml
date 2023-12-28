@@ -26,9 +26,9 @@
             <version>1.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.weikey</groupId>
+            <groupId>io.github.wei-key</groupId>
             <artifactId>liuguang-api-sdk</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
         </dependency>
 
         <dependency>

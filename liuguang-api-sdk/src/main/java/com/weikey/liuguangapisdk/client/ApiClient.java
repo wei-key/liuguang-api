@@ -10,7 +10,6 @@ import com.weikey.liuguangapisdk.dto.ResouRequest;
 import com.weikey.liuguangapisdk.dto.WeatherRequest;
 import com.weikey.liuguangapisdk.exception.ApiError;
 import com.weikey.liuguangapisdk.exception.ApiException;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +25,6 @@ import static com.weikey.liuguangapisdk.utils.SignUtils.getSign;
  * @author wei-key
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class ApiClient {
 
@@ -34,7 +32,13 @@ public class ApiClient {
 
     private String secretKey;
 
-    private static final String PREFIX = "http://127.0.0.1:8401/api/interface-service";
+    private String urlPrefix;
+
+    public ApiClient(String accessKey, String secretKey, String gatewayAddress) {
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.urlPrefix = gatewayAddress + "/api/interface-service";
+    }
 
     /**
      * 百度热搜接口
@@ -46,7 +50,7 @@ public class ApiClient {
         if (resouRequest != null && resouRequest.getSize() != null && resouRequest.getSize() > 0) {
             size = resouRequest.getSize();
         }
-        HttpResponse httpResponse = HttpRequest.get(PREFIX + "/resou/baidu")
+        HttpResponse httpResponse = HttpRequest.get(urlPrefix + "/resou/baidu")
                 .addHeaders(getHeaders())
                 .form("size", size)
                 .execute();
@@ -58,7 +62,7 @@ public class ApiClient {
      * @return
      */
     public String getZhihuResou() {
-        HttpResponse httpResponse = HttpRequest.get(PREFIX + "/resou/zhihu")
+        HttpResponse httpResponse = HttpRequest.get(urlPrefix + "/resou/zhihu")
                 .addHeaders(getHeaders())
                 .execute();
         return checkError(httpResponse);
@@ -74,7 +78,7 @@ public class ApiClient {
         if (resouRequest != null && resouRequest.getSize() != null && resouRequest.getSize() > 0) {
             size = resouRequest.getSize();
         }
-        HttpResponse httpResponse = HttpRequest.get(PREFIX + "/resou/weibo")
+        HttpResponse httpResponse = HttpRequest.get(urlPrefix + "/resou/weibo")
                 .addHeaders(getHeaders())
                 .form("size", size)
                 .execute();
@@ -90,7 +94,7 @@ public class ApiClient {
         if (weatherRequest != null && StrUtil.isNotBlank(weatherRequest.getCity())) {
             city = weatherRequest.getCity();
         }
-        HttpResponse httpResponse = HttpRequest.get(PREFIX + "/weather")
+        HttpResponse httpResponse = HttpRequest.get(urlPrefix + "/weather")
                 .addHeaders(getHeaders())
                 .form("city", city)
                 .execute();
@@ -102,7 +106,7 @@ public class ApiClient {
      * @return
      */
     public String todayInHistory() {
-        HttpResponse httpResponse = HttpRequest.get(PREFIX + "/event/today/in/history")
+        HttpResponse httpResponse = HttpRequest.get(urlPrefix + "/event/today/in/history")
                 .addHeaders(getHeaders())
                 .execute();
         return checkError(httpResponse);

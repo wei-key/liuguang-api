@@ -42,9 +42,6 @@ public class UserInterfaceInfoController {
     private UserInterfaceInfoService userInterfaceInfoService;
 
     @Resource
-    private ApiClient apiClient;
-
-    @Resource
     private UserFeignClient userFeignClient;
 
 

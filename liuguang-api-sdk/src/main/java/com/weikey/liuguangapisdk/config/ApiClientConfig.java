@@ -9,16 +9,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("api.client")
 @Data
-// @ComponentScan
 public class ApiClientConfig {
 
     private String accessKey;
 
     private String secretKey;
 
+    private String gatewayAddress;
+
     @Bean("apiClient")
     public ApiClient getApiClient() {
-        return new ApiClient(accessKey, secretKey);
+        return new ApiClient(accessKey, secretKey, gatewayAddress);
     }
 
 }
