@@ -5,19 +5,10 @@ spring:
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848
+  # 默认 dev 环境
+  profiles:
+    active: dev
 server:
   port: 8405
   servlet:
     context-path: /api/interface-service # 访问前缀
-
-# todo 开源记得脱敏
-# todo 看下是否可以重置，先前已经将密钥暴露出去
-api:
-  resou:
-    access-key: xxx
-    secret-key: xxx
-  weather:
-    appid: xxx
-    appsecret: xxx
-
-

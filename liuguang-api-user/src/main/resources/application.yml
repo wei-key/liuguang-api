@@ -1,6 +1,3 @@
-# 公共配置文件
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
-# @from <a href="https://yupi.icu">编程导航知识星球</a>
 spring:
   application:
     name: liuguang-api-user
@@ -19,12 +16,12 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/myapi
-    username: root
-    password: hsp
+    username: xxx
+    password: xxx
   redis:
     host: 127.0.0.1
     port: 6379
-    password: 123321
+    password: xxx
     # 需要手动配置连接池，连接池才会生效
     # spring默认使用的是lettuce客户端
     lettuce:

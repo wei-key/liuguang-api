@@ -1,0 +1,7 @@
+api:
+  resou:
+    access-key: xxx
+    secret-key: xxx
+  weather:
+    appid: xxx
+    appsecret: xxx

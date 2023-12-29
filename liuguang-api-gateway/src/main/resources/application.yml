@@ -19,10 +19,13 @@ spring:
             - Path=/api/order/**
   application:
     name: liuguang-api-gateway
+  # 默认 dev 环境
+  profiles:
+    active: dev
   redis:
     host: 127.0.0.1
     port: 6379
-    password: 123321
+    password: xxx
     # 需要手动配置连接池，连接池才会生效
     # spring默认使用的是lettuce客户端
     lettuce:
@@ -32,10 +35,10 @@ spring:
         min-idle: 0
         max-wait: 100ms
   rabbitmq:
-    host: 192.168.200.130
+    host: 127.0.0.1
     port: 5672
-    username: admin
-    password: 123456
+    username: xxx
+    password: xxx
     virtualHost: /
   main:
     web-application-type: reactive

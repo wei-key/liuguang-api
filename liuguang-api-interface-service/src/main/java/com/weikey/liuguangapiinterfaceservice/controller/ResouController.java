@@ -1,8 +1,12 @@
 package com.weikey.liuguangapiinterfaceservice.controller;
 
 import cn.hutool.http.HttpRequest;
-import com.weikey.liuguangapiinterfaceservice.utils.HeadersUtils;
+import com.weikey.liuguangapiinterfaceservice.config.ApiKeyConfig;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 热搜接口
@@ -12,6 +16,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/resou")
 public class ResouController {
+
+    @Resource
+    private ApiKeyConfig apiKeyConfig;
+
     /**
      * 百度热搜接口
      * @param size 热搜条数
@@ -20,7 +28,7 @@ public class ResouController {
     @GetMapping("/baidu")
     public String getBaiduResou(@RequestParam int size) {
         return HttpRequest.get("https://www.coderutil.com/api/resou/v1/baidu")
-                .addHeaders(HeadersUtils.getHeaders())
+                .addHeaders(getHeaders())
                 .form("size", size).execute().body();
     }
 
@@ -31,7 +39,7 @@ public class ResouController {
     @GetMapping("/zhihu")
     public String getZhihuResou() {
         return HttpRequest.get("https://www.coderutil.com/api/resou/v1/zhihu")
-                .addHeaders(HeadersUtils.getHeaders()).execute().body();
+                .addHeaders(getHeaders()).execute().body();
     }
 
     /**
@@ -42,8 +50,14 @@ public class ResouController {
     @GetMapping("/weibo")
     public String getWeiboResou(@RequestParam int size) {
         return HttpRequest.get("https://www.coderutil.com/api/resou/v1/weibo")
-                .addHeaders(HeadersUtils.getHeaders())
+                .addHeaders(getHeaders())
                 .form("size", size).execute().body();
     }
 
+    private Map<String, String> getHeaders() {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("access-key", apiKeyConfig.getAccessKey());
+        headers.put("secret-key", apiKeyConfig.getSecretKey());
+        return headers;
+    }
 }

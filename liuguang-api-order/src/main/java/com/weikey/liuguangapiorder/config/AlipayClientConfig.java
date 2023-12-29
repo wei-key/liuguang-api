@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 
 @Configuration
 //加载配置文件
-@PropertySource("classpath:alipay-sandbox_backup.properties")
+@PropertySource("classpath:alipay-sandbox-dev.properties")
 public class AlipayClientConfig {
 
     @Resource
